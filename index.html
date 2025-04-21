@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>코켓배송 - 홀짝 배달작전</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Arial', sans-serif; }
+    .screen {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      min-height: 100vh;
+      text-align: center;
+      padding: 20px;
+    }
+    /* 인트로 텍스트 */
+    #intro-text { display: flex; background-color: #fff; color: #333; }
+    #intro-text h1 { font-size: 28px; margin-bottom: 10px; } /* +4px */
+    #intro-text p { margin: 5px 0; font-size: 20px; }     /* +4px */
+    #begin-btn { margin-top: 20px; padding: 15px 30px; font-size: 22px; background-color: #ff6b6b; color: #fff; border: none; border-radius: 10px; cursor: pointer; }
+
+    /* 게임 화면 */
+    #game {
+      background: url('1.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;            /* 하얀색 텍스트 */
+      font-weight: bold;      /* 굵은 글씨 */
+      text-shadow: 1px 1px 3px #000;
+      position: relative;
+    }
+    .dog { font-size: 86px; margin-bottom: 10px; }       /* +4px */
+    #status { font-size: 24px; margin-bottom: 10px; }    /* +4px */
+    #game h1 { font-size: 32px; margin: 10px; }          /* +4px */
+    button.choice {
+      padding: 15px 30px;
+      margin: 10px;
+      font-size: 28px;                                    /* +4px */
+      background: rgba(255,255,255,0.85);
+      color: #333;
+      border: 2px solid #ff9900;
+      border-radius: 12px;
+      cursor: pointer;
+      width: 150px;
+      font-weight: bold;
+    }
+    button.choice:hover { background: #fff2cc; }
+    #result { font-size: 28px; margin-top: 20px; padding: 0 10px; } /* +4px */
+
+    /* 저작권 */
+    #game .attribution {
+      position: absolute;
+      bottom: 20px;
+      width: 100%;
+      font-size: 18px;
+      color: #fff;
+      text-shadow: 1px 1px 2px #000;
+    }
+    #game .attribution a { color: #ffd700; text-decoration: underline; }
+
+    /* 게임 오버 화면 */
+    #game-over {
+      background: url('c64f34b4-4113-4509-9745-96f0b3ae6592.png') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff;
+      text-shadow: 1px 1px 3px #000;
+    }
+    #game-over h1 { font-size: 32px; margin-bottom: 10px; } /* +4px */
+    #game-over p { font-size: 22px; margin: 5px 0; }       /* +4px */
+    #restart-btn { margin-top: 20px; padding: 12px 28px; font-size: 22px; background-color: #ff99cc; color: #fff; border: none; border-radius: 10px; cursor: pointer; } /* +4px */
+  </style>
+</head>
+<body>
+
+  <!-- 1) 인트로 화면 -->
+  <div id="intro-text" class="screen">
+    <div>
+      <h1>❤️코켓배송 - 홀짝 배달작전🚚</h1>
+      <p> 연속으로 3번 맞출시 라이프1이 추가 됩니다.</p>
+      <p>라이프가 끝나면 게임은 끝납니다.</p>
+      <p>유튜브 '걸코_Gulko' 저작권 콘텐츠입니다.</p>
+      <p>© 2025 코켓게임즈. All rights reserved.</p>
+      <p><a href="https://www.youtube.com/@Gulko" target="_blank">https://www.youtube.com/@Gulko</a></p>
+      <button id="begin-btn">게임 시작</button>
+    </div>
+  </div>
+
+  <!-- 2) 게임 화면 -->
+  <div id="game" class="screen">
+    <div id="status">
+      Score: <span id="score">0</span> | 
+      Lives: <span id="lives">5</span>
+    </div>
+    <div class="dog">❤️ 📦</div>
+    <h1>코켓배송 - 홀짝 배달작전!</h1>
+    <p>택배 박스 속 숫자는 <strong>홀수</strong>일까요? <strong>짝수</strong>일까요?</p>
+    <div>
+      <button class="choice" onclick="play('홀')">홀  수</button>
+      <button class="choice" onclick="play('짝')">짝  수</button>
+    </div>
+    <p id="result"></p>
+
+    <!-- 저작권 -->
+    <div class="attribution">
+      유튜브 '걸코_Gulko' 저작권 콘텐츠입니다. 
+      <a href="https://www.youtube.com/@Gulko" target="_blank">https://www.youtube.com/@Gulko</a><br>
+      © 2025 코켓게임즈. All rights reserved.
+    </div>
+  </div>
+
+  <!-- 3) 게임 오버 화면 -->
+  <div id="game-over" class="screen">
+    <h1>게임 오버! 😢</h1>
+    <p>코팡 구입은 걸코와 함께</p>
+    <p><a href="https://www.youtube.com/@Gulko" target="_blank">https://www.youtube.com/@Gulko</a></p>
+    <p>사랑합니다. 고객님</p>
+    <button id="restart-btn">다시 시작</button>
+  </div>
+
+  <!-- 오디오 -->
+  <audio id="correct-sound" src="1.mp3" preload="auto"></audio>
+  <audio id="wrong-sound" src="2.mp3" preload="auto"></audio>
+  <audio id="bonus-sound" src="bonus.mp3" preload="auto"></audio>
+  <audio id="bgm" src="bgm.mp3" loop preload="auto"></audio>
+
+  <script>
+    let wrongCount = 0;
+    const maxWrong = 5;
+    let consecutiveCorrect = 0;
+    let score = 0;
+
+    window.onload = () => {
+      showScreen('intro-text');
+    };
+
+    document.getElementById('begin-btn').addEventListener('click', () => {
+      showScreen('game');
+      document.getElementById('bgm').play();
+      document.getElementById('score').textContent = score;
+      document.getElementById('lives').textContent = maxWrong - wrongCount;
+    });
+
+    function play(userChoice) {
+      if (wrongCount >= maxWrong) return;
+
+      const number = Math.floor(Math.random() * 100) + 1;
+      const correctAnswer = number % 2 === 0 ? '짝' : '홀';
+      const resultEl = document.getElementById('result');
+      const correctSound = document.getElementById('correct-sound');
+      const wrongSound = document.getElementById('wrong-sound');
+
+      // 매번 재생을 위해 currentTime 초기화
+      correctSound.currentTime = 0;
+      wrongSound.currentTime = 0;
+
+      if (userChoice === correctAnswer) {
+        score++;
+        consecutiveCorrect++;
+        document.getElementById('score').textContent = score;
+        resultEl.textContent = `🎉 정답! ${number}는 ${correctAnswer}. 배달 성공!`;
+        resultEl.style.color = '#fff';  // 정답 피드백 하얀색
+        correctSound.play();
+
+        if (consecutiveCorrect >= 3) {
+          const bonusSound = document.getElementById('bonus-sound');
+          bonusSound.currentTime = 0;
+          bonusSound.play();
+          // 생명 1개 추가
+          wrongCount = Math.max(0, wrongCount - 1);
+          document.getElementById('lives').textContent = maxWrong - wrongCount;
+          consecutiveCorrect = 0;
+        }
+      } else {
+        wrongCount++;
+        consecutiveCorrect = 0;
+        document.getElementById('lives').textContent = maxWrong - wrongCount;
+        resultEl.textContent = `😢 틀렸어요! ${number}는 ${correctAnswer}. 실패`;
+        resultEl.style.color = 'red';
+        wrongSound.play();
+
+        if (wrongCount >= maxWrong) {
+          showScreen('game-over');
+        }
+      }
+    }
+
+    document.getElementById('restart-btn').addEventListener('click', () => {
+      location.reload();
+    });
+
+    function showScreen(id) {
+      ['intro-text','game','game-over'].forEach(key => {
+        document.getElementById(key).style.display = (key === id ? 'flex' : 'none');
+      });
+    }
+  </script>
+</body>
+</html>
